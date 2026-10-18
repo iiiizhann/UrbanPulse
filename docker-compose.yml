@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: urbanpulse_server
+    restart: always
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - CLIENT_URL=http://localhost:5173
+      - MONGO_URI=${MONGO_URI}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_EXPIRES_IN=7d
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: urbanpulse_client
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
