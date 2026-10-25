@@ -12,6 +12,9 @@ const router = express.Router();
 router.get('/latest', getLatestSnapshot);
 router.get('/trends', getCityHistoricalTrends);
 
+// Public manual ingestion trigger for testing & webhooks
+router.post('/ingest', triggerManualETL);
+
 // Admin-only endpoints
 router.get('/pipeline-logs', verifyJWT, authorizeRoles('Admin'), getPipelineLogs);
 router.post('/trigger-etl', verifyJWT, authorizeRoles('Admin'), triggerManualETL);

@@ -4,6 +4,7 @@ import { Navbar } from '../components/layout/Navbar';
 import { StatCard } from '../components/dashboard/StatCard';
 import { TrendChart } from '../components/charts/TrendChart';
 import { CityMap } from '../components/dashboard/CityMap';
+import { AlertManager } from '../components/alerts/AlertManager';
 import {
   Thermometer,
   Droplets,
@@ -419,6 +420,9 @@ export const DashboardPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Threshold Alert Manager Section */}
+            <AlertManager currentCity={selectedCity} />
           </>
         ) : (
           <div className="text-center py-16 apple-glass rounded-3xl text-slate-500">

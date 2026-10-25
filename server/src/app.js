@@ -7,6 +7,7 @@ import { AppError } from './utils/AppError.js';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
+import alertRoutes from './routes/alert.routes.js';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get('/health', (req, res) => {
 // Mount Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/alerts', alertRoutes);
 
 // Undefined Route Handler (Catch-all for Express 5)
 app.use((req, res, next) => {
