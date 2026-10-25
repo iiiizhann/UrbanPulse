@@ -152,7 +152,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-[#edf2f7] relative overflow-hidden text-slate-800">
-      {/* Dynamic Animated Liquid Glass Orbs */}
+      {/* Liquid glass background accent bubbles */}
       <div className="fixed -top-48 -left-48 w-[550px] h-[550px] bg-gradient-to-tr from-teal-300/45 to-emerald-200/40 rounded-full blur-[130px] pointer-events-none animate-float-slow" />
       <div className="fixed top-1/4 -right-48 w-[600px] h-[600px] bg-gradient-to-br from-sky-300/40 to-blue-300/30 rounded-full blur-[140px] pointer-events-none animate-float-reverse" />
       <div className="fixed -bottom-48 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-300/35 to-purple-200/30 rounded-full blur-[120px] pointer-events-none animate-float-slow" />
@@ -160,6 +160,7 @@ export const DashboardPage = () => {
       <Navbar selectedCity={selectedCity} onSelectCity={setSelectedCity} cities={cities} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 relative z-10">
+        
         {/* Floating Capsule Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -172,7 +173,6 @@ export const DashboardPage = () => {
                 Metropolitan Node
               </span>
 
-              {/* Pulsing Neon Live Badge */}
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold apple-capsule text-teal-800 transition-all hover:scale-105 cursor-default">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-80" />
@@ -209,6 +209,9 @@ export const DashboardPage = () => {
           </div>
         </div>
 
+        {/* Civic Alert Manager Mounted Prominently at Top */}
+        <AlertManager currentCity={selectedCity} />
+
         {loading ? (
           <div className="h-80 flex flex-col items-center justify-center space-y-4 apple-glass rounded-3xl">
             <div className="relative">
@@ -223,9 +226,9 @@ export const DashboardPage = () => {
           <>
             {/* Top Interactive Zone: Radial Visualizer & Weather Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Apple Glass Dynamic AQI Arc Visualizer (5 cols) */}
+              
+              {/* Radial Arc Visualizer (5 cols) */}
               <div className="lg:col-span-5 apple-glass rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
-                {/* Dynamic Specular Orb inside Card */}
                 <div
                   className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl pointer-events-none transition-all duration-1000 ease-out group-hover:scale-125"
                   style={{ backgroundColor: aqiTheme.glow }}
@@ -246,7 +249,6 @@ export const DashboardPage = () => {
                     </span>
                   </div>
 
-                  {/* SVG Arc Display with Smooth Render */}
                   <div className="relative flex flex-col items-center justify-center pt-6 pb-2">
                     <svg width="230" height="130" viewBox="0 0 230 130" className="overflow-visible">
                       <path
@@ -287,7 +289,7 @@ export const DashboardPage = () => {
                   </p>
                 </div>
 
-                {/* Micro Pollutant Glass Chips */}
+                {/* Pollutant Chips */}
                 <div className="grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-slate-200/50 relative z-10">
                   <div className="apple-capsule rounded-2xl p-3.5 transition-transform hover:-translate-y-0.5">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase">
@@ -343,7 +345,7 @@ export const DashboardPage = () => {
                   />
                 </div>
 
-                {/* Apple Glass Dark Console Banner */}
+                {/* Console Banner */}
                 <div className="apple-glass-dark text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between flex-1 group">
                   <div className="absolute top-0 right-0 w-72 h-72 bg-teal-400/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-400/25 transition-all duration-700" />
 
@@ -420,9 +422,6 @@ export const DashboardPage = () => {
                 </div>
               </div>
             </div>
-
-            {/* Threshold Alert Manager Section */}
-            <AlertManager currentCity={selectedCity} />
           </>
         ) : (
           <div className="text-center py-16 apple-glass rounded-3xl text-slate-500">
