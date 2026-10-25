@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { alertService } from '../../services/alert.service.js';
-import { CreateRuleModal } from './CreateRuleModal.jsx';
+import { alertService } from '../../services/alert.service';
+import { CreateRuleModal } from './CreateRuleModal';
+import {
+  BellRing,
+  Plus,
+  Trash2,
+  Power,
+  ShieldCheck,
+  Send,
+  Zap,
+} from 'lucide-react';
 
-export const AlertManager = () => {
+export const AlertManager = ({ currentCity }) => {
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [statusMessage, setStatusMessage] = useState(null);
+  const [notice, setNotice] = useState(null);
 
   const fetchRules = async () => {
     try {
@@ -14,7 +23,7 @@ export const AlertManager = () => {
       const data = await alertService.getRules();
       setRules(data);
     } catch (err) {
-      showNotice(err.message, 'error');
+      flashNotice(err.message || 'Failed to fetch alert rules', 'error');
     } finally {
       setLoading(false);
     }
@@ -24,14 +33,14 @@ export const AlertManager = () => {
     fetchRules();
   }, []);
 
-  const showNotice = (msg, type = 'info') => {
-    setStatusMessage({ msg, type });
-    setTimeout(() => setStatusMessage(null), 4000);
+  const flashNotice = (msg, type = 'success') => {
+    setNotice({ msg, type });
+    setTimeout(() => setNotice(null), 3500);
   };
 
   const handleCreate = async (payload) => {
     await alertService.createRule(payload);
-    showNotice('Alert rule successfully created!', 'success');
+    flashNotice(`Alert activated for ${payload.city}!`);
     fetchRules();
   };
 
@@ -39,129 +48,161 @@ export const AlertManager = () => {
     try {
       const updated = await alertService.toggleRule(rule._id, !rule.isActive);
       setRules((prev) => prev.map((r) => (r._id === rule._id ? { ...r, isActive: updated.isActive } : r)));
-      showNotice(`Rule ${updated.isActive ? 'activated' : 'paused'}.`, 'success');
+      flashNotice(`Rule for ${rule.city} ${updated.isActive ? 'resumed' : 'paused'}.`);
     } catch (err) {
-      showNotice(err.message, 'error');
+      flashNotice(err.message, 'error');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this alerting rule?')) return;
+  const handleDelete = async (id, city) => {
+    if (!window.confirm(`Delete alert rule for ${city}?`)) return;
     try {
       await alertService.deleteRule(id);
       setRules((prev) => prev.filter((r) => r._id !== id));
-      showNotice('Rule deleted permanently.', 'info');
+      flashNotice(`Rule deleted.`, 'info');
     } catch (err) {
-      showNotice(err.message, 'error');
+      flashNotice(err.message, 'error');
     }
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 backdrop-blur">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+    <div className="apple-glass rounded-3xl p-6 relative overflow-hidden space-y-4">
+      {/* Card Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/60">
         <div>
-          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-            <span>🛡️</span> Telemetry Alert Dispatcher
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time threshold evaluations dispatched to Discord Webhooks & Telegram.
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-teal-500/15 text-teal-700">
+              <BellRing className="h-4 w-4" />
+            </div>
+            <h2 className="text-base font-extrabold tracking-tight text-slate-900">
+              Civic Alert Dispatcher
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Automated threshold triggers delivering instant alerts to Discord and Telegram.
           </p>
         </div>
+
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition"
+          className="inline-flex items-center space-x-2 text-xs font-bold px-4 py-2.5 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition active:scale-95 shadow-sm"
         >
-          <span>+</span> New Rule
+          <Plus className="h-3.5 w-3.5" />
+          <span>New Alert Rule</span>
         </button>
       </div>
 
-      {statusMessage && (
+      {notice && (
         <div
-          className={`my-4 p-3 rounded-xl text-xs font-medium border ${
-            statusMessage.type === 'error'
-              ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+          className={`p-3 rounded-2xl text-xs font-semibold border flex items-center gap-2 ${
+            notice.type === 'error'
+              ? 'bg-rose-50 border-rose-200 text-rose-700'
+              : 'bg-teal-50 border-teal-200 text-teal-700'
           }`}
         >
-          {statusMessage.msg}
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          <span>{notice.msg}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="py-12 text-center text-sm text-slate-500 animate-pulse">
-          Querying threshold rules from MongoDB...
+        <div className="py-8 text-center text-xs font-semibold text-slate-400 animate-pulse">
+          Loading active rules...
         </div>
       ) : rules.length === 0 ? (
-        <div className="py-12 text-center text-slate-500 text-sm">
-          No automated alerting rules registered yet. Click <span className="text-indigo-400 font-medium">New Rule</span> to add one.
+        <div className="py-8 text-center text-xs font-medium text-slate-400">
+          No alert rules yet. Click <strong className="text-slate-700 font-bold">New Alert Rule</strong> to set your first alert.
         </div>
       ) : (
-        <div className="overflow-x-auto mt-4">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-800/60 text-slate-400 uppercase tracking-wider font-semibold">
-              <tr>
-                <th className="px-4 py-3 rounded-l-lg">Target</th>
-                <th className="px-4 py-3">Metric Condition</th>
-                <th className="px-4 py-3">Channel</th>
-                <th className="px-4 py-3">Cooldown Status</th>
-                <th className="px-4 py-3">State</th>
-                <th className="px-4 py-3 text-right rounded-r-lg">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-200/60 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <th className="pb-3 px-3">City</th>
+                <th className="pb-3 px-3">Threshold Condition</th>
+                <th className="pb-3 px-3">Channel</th>
+                <th className="pb-3 px-3">Status</th>
+                <th className="pb-3 px-3">State</th>
+                <th className="pb-3 px-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-100/80">
               {rules.map((rule) => {
-                const cooldownActive =
-                  rule.lastTriggeredAt &&
-                  Date.now() - new Date(rule.lastTriggeredAt).getTime() < 60 * 60 * 1000;
+                const isCurrent = rule.city.toLowerCase() === currentCity.toLowerCase();
 
                 return (
-                  <tr key={rule._id} className="hover:bg-slate-800/30 transition">
-                    <td className="px-4 py-3 font-semibold text-white">
-                      {rule.city}
+                  <tr
+                    key={rule._id}
+                    className={`transition-colors ${
+                      isCurrent ? 'bg-teal-500/5' : 'hover:bg-slate-50/60'
+                    }`}
+                  >
+                    <td className="py-3.5 px-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-slate-900">{rule.city}</span>
+                        {isCurrent && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-extrabold uppercase">
+                            Current
+                          </span>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 font-mono">
-                      <span className="text-slate-400">{rule.metric}</span>{' '}
-                      <span className="text-amber-400 font-bold">
-                        {rule.condition === 'GREATER_THAN' ? '≥' : '≤'}
-                      </span>{' '}
-                      <span className="text-indigo-300 font-bold">{rule.threshold}</span>
+
+                    <td className="py-3.5 px-3">
+                      <div className="inline-flex items-center space-x-1.5 font-mono text-xs">
+                        <span className="font-bold text-slate-700">{rule.metric}</span>
+                        <span className="text-amber-500 font-black">
+                          {rule.condition === 'GREATER_THAN' ? '≥' : '≤'}
+                        </span>
+                        <span className="font-black text-slate-900 px-2 py-0.5 rounded-lg bg-white/80 border border-slate-200">
+                          {rule.threshold} {rule.metric === 'TEMPERATURE' ? '°C' : ''}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-800 border border-slate-700 text-slate-300">
-                        {rule.channel === 'WEBHOOK' ? '🟣 Discord' : '🔵 Telegram'}
+
+                    <td className="py-3.5 px-3">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold apple-capsule text-slate-700">
+                        <Send className="h-3 w-3 text-indigo-500" />
+                        <span>{rule.channel === 'WEBHOOK' ? 'Discord' : 'Telegram'}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      {cooldownActive ? (
-                        <span className="text-amber-400 flex items-center gap-1">
-                          ⏳ Cooldown Active
-                        </span>
+
+                    <td className="py-3.5 px-3">
+                      {!rule.isActive ? (
+                        <span className="text-[11px] text-slate-400 font-medium">Inactive</span>
                       ) : rule.lastTriggeredAt ? (
-                        <span className="text-slate-400">
-                          Last: {new Date(rule.lastTriggeredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-teal-500/15 text-teal-700 border border-teal-500/30">
+                          <Zap className="h-3 w-3 text-teal-600" />
+                          <span>
+                            Triggered {new Date(rule.lastTriggeredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </span>
                       ) : (
-                        <span className="text-slate-500">Standby (Never fired)</span>
+                        <span className="text-[11px] text-slate-400 font-medium">Armed (Instant)</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="py-3.5 px-3">
                       <button
                         onClick={() => handleToggle(rule)}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition ${
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-xl text-[11px] font-bold transition-all ${
                           rule.isActive
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
-                            : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+                            ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 hover:bg-emerald-500/25'
+                            : 'bg-slate-200/60 text-slate-500 border border-slate-300 hover:bg-slate-200'
                         }`}
                       >
-                        {rule.isActive ? '● Active' : '○ Paused'}
+                        <Power className="h-3 w-3" />
+                        <span>{rule.isActive ? 'Active' : 'Paused'}</span>
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-right">
+
+                    <td className="py-3.5 px-3 text-right">
                       <button
-                        onClick={() => handleDelete(rule._id)}
-                        className="text-slate-500 hover:text-rose-400 transition font-medium"
+                        onClick={() => handleDelete(rule._id, rule.city)}
+                        className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        title="Delete rule"
                       >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
                   </tr>
@@ -176,6 +217,7 @@ export const AlertManager = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreated={handleCreate}
+        defaultCity={currentCity}
       />
     </div>
   );

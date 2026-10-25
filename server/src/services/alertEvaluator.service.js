@@ -2,7 +2,7 @@ import { AlertRule } from '../models/AlertRule.js';
 import { sendTelegramAlert, sendWebhookAlert } from './notification.service.js';
 import { logger } from '../utils/logger.js';
 
-const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
+const COOLDOWN_MS = 0;
 
 export const evaluateMetricAlerts = async (cityMetric) => {
   try {

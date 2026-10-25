@@ -13,6 +13,11 @@ const CreateAlertSchema = z.object({
   destination: z.string().min(3),
 });
 
+const UpdateAlertSchema = z.object({
+  isActive: z.boolean().optional(),
+  threshold: z.number().min(1).optional(),
+});
+
 // GET /api/v1/alerts
 router.get('/', async (req, res, next) => {
   try {
@@ -29,6 +34,26 @@ router.post('/', async (req, res, next) => {
     const validated = CreateAlertSchema.parse(req.body);
     const rule = await AlertRule.create(validated);
     res.status(201).json({ success: true, data: rule });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/v1/alerts/:id
+router.patch('/:id', async (req, res, next) => {
+  try {
+    const validated = UpdateAlertSchema.parse(req.body);
+    const rule = await AlertRule.findByIdAndUpdate(
+      req.params.id,
+      { $set: validated },
+      { new: true }
+    );
+
+    if (!rule) {
+      return res.status(404).json({ success: false, message: 'Alert rule not found' });
+    }
+
+    res.json({ success: true, data: rule });
   } catch (err) {
     next(err);
   }

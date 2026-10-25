@@ -5,6 +5,7 @@ import { CityMetric } from '../models/CityMetric.js';
 import { PipelineLog } from '../models/PipelineLog.js';
 import { logger } from '../utils/logger.js';
 import { env } from '../config/env.js';
+import { evaluateMetricAlerts } from '../services/alertEvaluator.service.js';
 
 // Weather Schema
 const WeatherResponseSchema = z.object({
@@ -180,6 +181,11 @@ export const runCityMetricsETL = async (cityConfig) => {
     } else {
       logger.info(`ℹ️ [ETL] Deduplicated: Identical metric snapshot exists for ${cityConfig.name}`);
     }
+
+    // Trigger non-blocking asynchronous threshold alert evaluation
+    evaluateMetricAlerts(transformedRecord).catch((evalErr) => {
+      logger.error(`❌ [Alert Evaluation] Failed for ${cityConfig.name}: ${evalErr.message}`);
+    });
 
     // Write audit log
     await PipelineLog.create({
