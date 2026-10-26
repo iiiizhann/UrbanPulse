@@ -6,11 +6,13 @@ import { TrendChart } from '../components/charts/TrendChart';
 import { CityMap } from '../components/dashboard/CityMap';
 import { AlertManager } from '../components/alerts/AlertManager';
 import { OutdoorActivityCard } from '../components/dashboard/OutdoorActivityCard.jsx';
+import { generateGrievanceDocket } from '../utils/grievancePdfGenerator';
 import {
   Thermometer,
   Droplets,
   Fuel,
   Download,
+  FileText,
   Radio,
   Activity,
   Layers,
@@ -85,6 +87,15 @@ export const DashboardPage = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExportDocket = () => {
+    if (!snapshot) return;
+    generateGrievanceDocket({
+      selectedCity,
+      snapshot,
+      trends,
+    });
   };
 
   const getAqiTheme = (aqi = 0) => {
@@ -195,6 +206,18 @@ export const DashboardPage = () => {
               >
                 <Download className="h-3.5 w-3.5 text-slate-500" />
                 <span>Export CSV</span>
+              </button>
+            )}
+
+            {/* Municipal Civic Grievance Docket Export */}
+            {snapshot && (
+              <button
+                onClick={handleExportDocket}
+                className="inline-flex items-center space-x-2 text-xs font-semibold px-4 py-2.5 rounded-2xl apple-capsule hover:bg-white text-rose-700 transition-all active:scale-95 hover:shadow-md border border-rose-200/60"
+                title="Generate official audit PDF for municipal authorities"
+              >
+                <FileText className="h-3.5 w-3.5 text-rose-600" />
+                <span>Grievance Docket</span>
               </button>
             )}
 
