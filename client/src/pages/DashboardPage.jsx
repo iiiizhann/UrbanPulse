@@ -5,6 +5,7 @@ import { StatCard } from '../components/dashboard/StatCard';
 import { TrendChart } from '../components/charts/TrendChart';
 import { CityMap } from '../components/dashboard/CityMap';
 import { AlertManager } from '../components/alerts/AlertManager';
+import { OutdoorActivityCard } from '../components/dashboard/OutdoorActivityCard.jsx';
 import {
   Thermometer,
   Droplets,
@@ -209,7 +210,7 @@ export const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Civic Alert Manager Mounted Prominently at Top */}
+        {/* Civic Alert Manager */}
         <AlertManager currentCity={selectedCity} />
 
         {loading ? (
@@ -224,6 +225,13 @@ export const DashboardPage = () => {
           </div>
         ) : snapshot ? (
           <>
+            {/* Proactive Outdoor Activity & Health Planner */}
+            <OutdoorActivityCard
+              aqi={snapshot.airQuality?.aqi ?? 0}
+              temperature={snapshot.weather?.temperature ?? 0}
+              trends={trends ?? []}
+            />
+
             {/* Top Interactive Zone: Radial Visualizer & Weather Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
